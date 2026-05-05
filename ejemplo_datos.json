@@ -1,0 +1,105 @@
+{
+  "contratos": [
+    {
+      "codigo_proceso": "PROC-2024-001",
+      "entidad": "Ministerio de Interior",
+      "titulo": "Adquisición de equipos de cómputo para sedes regionales",
+      "descripcion": "Se requiere la compra de 50 computadores portátiles con especificaciones según términos de referencia",
+      "proveedor": "Tech Solutions S.A.S.",
+      "modalidad": "Licitación Pública",
+      "departamento": "Cundinamarca",
+      "valor": 250000000,
+      "fecha_publicacion": "2024-01-15T00:00:00Z",
+      "fecha_adjudicacion": "2024-02-10T00:00:00Z",
+      "duracion_dias": 45,
+      "num_ofertas": 8,
+      "num_proponentes": 6,
+      "num_modificaciones": 0,
+      "datos_secop": {
+        "estado": "Adjudicado",
+        "porcentaje_ejecucion": 75
+      }
+    },
+    {
+      "codigo_proceso": "PROC-2024-002",
+      "entidad": "Gobernación de Antioquia",
+      "titulo": "Contratación de servicios de consultoría en gestión pública",
+      "descripcion": "Servicios de consultoría especializada en gestión administrativa y financiera",
+      "proveedor": "Consultoría Global Ltd.",
+      "modalidad": "Selección Abreviada",
+      "departamento": "Antioquia",
+      "valor": 85000000,
+      "fecha_publicacion": "2024-01-20T00:00:00Z",
+      "fecha_adjudicacion": "2024-02-05T00:00:00Z",
+      "duracion_dias": 90,
+      "num_ofertas": 3,
+      "num_proponentes": 3,
+      "num_modificaciones": 2,
+      "datos_secop": {
+        "estado": "En ejecución",
+        "porcentaje_ejecucion": 45
+      }
+    },
+    {
+      "codigo_proceso": "PROC-2024-003",
+      "entidad": "Alcaldía de Bogotá",
+      "titulo": "Mantenimiento y reparación de infraestructura vial",
+      "descripcion": "Trabajos de mantenimiento preventivo y correctivo de vías principales",
+      "proveedor": "Constructora Vías Colombianas S.A.",
+      "modalidad": "Licitación Pública Internacional",
+      "departamento": "Bogotá",
+      "valor": 520000000,
+      "fecha_publicacion": "2023-12-01T00:00:00Z",
+      "fecha_adjudicacion": "2024-01-10T00:00:00Z",
+      "duracion_dias": 180,
+      "num_ofertas": 12,
+      "num_proponentes": 9,
+      "num_modificaciones": 3,
+      "datos_secop": {
+        "estado": "En ejecución",
+        "porcentaje_ejecucion": 35
+      }
+    },
+    {
+      "codigo_proceso": "PROC-2024-ANOMALO-001",
+      "entidad": "Secretaría de Hacienda",
+      "titulo": "Suministro de artículos de oficina variados",
+      "descripcion": "Compra de suministros para oficina",
+      "proveedor": "Proveedor X Ltda.",
+      "modalidad": "Compra directa",
+      "departamento": "Bogotá",
+      "valor": 2500000000,
+      "fecha_publicacion": "2024-02-01T00:00:00Z",
+      "fecha_adjudicacion": "2024-02-02T00:00:00Z",
+      "duracion_dias": 2,
+      "num_ofertas": 1,
+      "num_proponentes": 1,
+      "num_modificaciones": 15,
+      "datos_secop": {
+        "estado": "Adjudicado",
+        "porcentaje_ejecucion": 100,
+        "observacion": "Proceso acelerado sin previa planificación"
+      }
+    },
+    {
+      "codigo_proceso": "PROC-2024-004",
+      "entidad": "Universidad Nacional",
+      "titulo": "Dotación de laboratorios de investigación",
+      "descripcion": "Adquisición de equipos especializados para laboratorios de física y química",
+      "proveedor": "Scientific Equipment Inc.",
+      "modalidad": "Licitación Pública",
+      "departamento": "Bogotá",
+      "valor": 180000000,
+      "fecha_publicacion": "2024-01-25T00:00:00Z",
+      "fecha_adjudicacion": "2024-02-15T00:00:00Z",
+      "duracion_dias": 60,
+      "num_ofertas": 5,
+      "num_proponentes": 4,
+      "num_modificaciones": 1,
+      "datos_secop": {
+        "estado": "Adjudicado",
+        "porcentaje_ejecucion": 20
+      }
+    }
+  ]
+}
