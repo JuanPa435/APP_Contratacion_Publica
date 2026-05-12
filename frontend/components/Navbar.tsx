@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
+import ThemeToggle from '@/components/ThemeToggle'
 import { FiLogOut, FiUser } from 'react-icons/fi'
 import { useEffect } from 'react'
 
@@ -47,6 +48,8 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+
+        <ThemeToggle />
 
         <button
           onClick={handleLogout}
