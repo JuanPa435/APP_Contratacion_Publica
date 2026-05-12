@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
 import ErrorAlert from '@/components/ErrorAlert'
 import api from '@/lib/api'
-import { FiCopy, FiPlus, FiAlertCircle, FiCheckCircle, FiEdit2, FiToggle2, FiCheck, FiX } from 'react-icons/fi'
+import { FiCopy, FiPlus, FiAlertCircle, FiCheckCircle, FiEdit2, FiCheck, FiX } from 'react-icons/fi'
 
 interface Code {
   id: number

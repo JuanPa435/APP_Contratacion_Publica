@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import api from '@/lib/api'
-import { FiArrowLeft, FiDownload, FiRefreshCw, FiAlertTriangle, FiCheckCircle, FiBarChart3 } from 'react-icons/fi'
+import { FiArrowLeft, FiDownload, FiRefreshCw, FiAlertTriangle, FiCheckCircle, FiBarChart2 } from 'react-icons/fi'
 
 interface Estadisticas {
   total_contratos: number
@@ -55,7 +55,7 @@ export default function SecopPage() {
     try {
       const [statsRes, contratosRes] = await Promise.all([
         api.get('/api/secop/estadisticas'),
-        api.get('/contratos'),
+        api.get('/contratos?limit=1000'),
       ])
       setStats(statsRes.data)
       setContratos(contratosRes.data)
@@ -212,7 +212,7 @@ ${informe.contratos_anomalos
           disabled={analizando || contratos.length === 0}
           className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition font-semibold"
         >
-          <FiBarChart3 size={20} />
+          <FiBarChart2 size={20} />
           {analizando ? 'Analizando...' : 'Análisis Completo'}
         </button>
         <button
@@ -391,7 +391,7 @@ ${informe.contratos_anomalos
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {contratos.slice(0, 20).map((contrato) => (
+              {contratos.slice(0, 50).map((contrato) => (
                 <tr key={contrato.id} className={contrato.es_anomalo ? 'bg-red-50' : ''}>
                   <td className="px-6 py-4 text-sm text-gray-900 font-mono">{contrato.codigo_proceso}</td>
                   <td className="px-6 py-4 text-sm text-gray-600 truncate">{contrato.entidad}</td>
@@ -416,9 +416,9 @@ ${informe.contratos_anomalos
             </tbody>
           </table>
         </div>
-        {contratos.length > 20 && (
+        {contratos.length > 50 && (
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 text-sm text-gray-600">
-            Mostrando 20 de {contratos.length} contratos
+            Mostrando 50 de {contratos.length} contratos
           </div>
         )}
       </div>

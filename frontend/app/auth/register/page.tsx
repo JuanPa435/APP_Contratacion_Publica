@@ -1,7 +1,9 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { FormEvent, useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import Link from 'next/link'
 import api from '@/lib/api'
@@ -9,13 +11,22 @@ import { FiUser, FiMail, FiLock, FiKey, FiAlertCircle, FiCheckCircle } from 'rea
 
 export default function RegisterPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { register, isLoading, error } = useAuth()
 
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [codigo_registro, setCodigo] = useState(searchParams.get('code') || '')
+  const [codigo_registro, setCodigo] = useState('')
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code') || ''
+      setCodigo(code.toUpperCase())
+    } catch (e) {
+      // ignore
+    }
+  }, [])
   const [success, setSuccess] = useState(false)
   const [codigoValido, setCodigoValido] = useState<any>(null)
   const [validandoCodigo, setValidandoCodigo] = useState(false)
