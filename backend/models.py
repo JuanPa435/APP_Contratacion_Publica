@@ -98,3 +98,17 @@ class ResultadoAnalisis(Base):
     total_anomalias = Column(Integer, nullable=False)
     contamination = Column(Float, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class LogAuditoria(Base):
+    __tablename__ = "logs_auditoria"
+
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+    accion = Column(String(50), nullable=False, index=True)
+    entidad = Column(String(100), nullable=False)
+    entidad_id = Column(Integer, nullable=False)
+    cambios = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+
+    usuario = relationship("Usuario")

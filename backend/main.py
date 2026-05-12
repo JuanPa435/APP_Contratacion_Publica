@@ -19,6 +19,7 @@ from backend.services.secop_importer import load_secop_csv, upsert_contracts
 
 from backend.routes.auditorias_routes import router as auditorias_router
 from backend.routes.reportes_routes import router as reportes_router
+from backend.routes.audit_logs_routes import router as audit_logs_router
 
 app = FastAPI(title="APP Contratacion Publica")
 
@@ -101,6 +102,7 @@ app.include_router(analisis_router, prefix="/analisis", tags=["analisis"])
 app.include_router(secop_router, prefix="/api", tags=["secop"])
 app.include_router(auditorias_router, prefix="/auditorias", tags=["auditorias"])
 app.include_router(reportes_router, prefix="/reportes", tags=["reportes"])
+app.include_router(audit_logs_router, prefix="/audit-logs", tags=["audit-logs"])
 
 @app.get("/")
 def read_root() -> dict[str, str]:
