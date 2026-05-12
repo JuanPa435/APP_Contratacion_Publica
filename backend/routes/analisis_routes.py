@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend.dependencies import get_current_user
-from backend.models import Alerta, Contrato, ResultadoAnalisis, Usuario
-from backend.schemas import AnalysisRunRequest, AnalysisSummary, AlertRead
-from backend.services.analysis_service import score_contracts
+from backend.models import Alerta, Contrato, ResultadoAnalisis, Usuario, SolicitudAuditoria
+from backend.schemas import AnalysisRunRequest, AnalysisSummary, AlertRead, AlertCreate
+from backend.services.analysis_service import filter_contracts_by_publication_window, score_contracts
+from datetime import datetime, timezone
 
 
 router = APIRouter()
@@ -15,11 +16,20 @@ router = APIRouter()
 def execute_analysis(
     payload: AnalysisRunRequest,
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_current_user),
+    current_user: Usuario = Depends(get_current_user),
+    min_years_back: int = Query(default=1, ge=0, le=20),
+    max_years_back: int = Query(default=2, ge=0, le=20),
 ) -> dict[str, int | float]:
-    contracts = db.query(Contrato).all()
+    contracts = filter_contracts_by_publication_window(
+        db.query(Contrato).all(),
+        min_years_back=min_years_back,
+        max_years_back=max_years_back,
+    )
     if not contracts:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No hay contratos para analizar")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No hay contratos SECOP en el rango de fechas solicitado",
+        )
 
     results = score_contracts(contracts, payload.contamination)
     total_anomalies = 0
@@ -39,14 +49,31 @@ def execute_analysis(
                 .first()
             )
             if exists is None:
-                db.add(
-                    Alerta(
-                        contrato_id=contract.id,
-                        nivel=result.nivel,
-                        mensaje=result.mensaje,
-                        score=result.score,
-                    )
+                alert_data = AlertCreate(
+                    contrato_id=contract.id,
+                    nivel=result.nivel,
+                    mensaje=result.mensaje,
+                    score=result.score,
                 )
+                alerta = Alerta(**alert_data.model_dump())
+                db.add(alerta)
+
+            # Crear solicitud de auditoría automáticamente
+            audit_exists = (
+                db.query(SolicitudAuditoria)
+                .filter(SolicitudAuditoria.contrato_id == contract.id, SolicitudAuditoria.estado != "rechazada")
+                .first()
+            )
+            if audit_exists is None:
+                solicitud = SolicitudAuditoria(
+                    contrato_id=contract.id,
+                    usuario_id=current_user.id,
+                    motivo=f"Anomalía detectada en análisis: {result.mensaje}",
+                    evidencia=f"Score de anomalía: {result.score:.4f}",
+                    prioridad="alta" if result.score > 0.7 else "media",
+                    estado="pendiente",
+                )
+                db.add(solicitud)
 
     db.add(
         ResultadoAnalisis(
