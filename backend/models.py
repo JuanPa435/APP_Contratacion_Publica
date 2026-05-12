@@ -70,6 +70,26 @@ class Alerta(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
+class SolicitudAuditoria(Base):
+    __tablename__ = "solicitudes_auditoria"
+
+    id = Column(Integer, primary_key=True, index=True)
+    contrato_id = Column(Integer, ForeignKey("contratos.id"), nullable=False, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
+    motivo = Column(String(1000), nullable=False)
+    evidencia = Column(String(1000), nullable=True)
+    prioridad = Column(String(30), nullable=False, default="media")
+    estado = Column(String(30), nullable=False, default="pendiente")
+    comentarios = Column(String(1000), nullable=True)
+    assigned_to = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    contrato = relationship("Contrato")
+    usuario = relationship("Usuario", foreign_keys=[usuario_id])
+    auditor = relationship("Usuario", foreign_keys=[assigned_to])
+
+
 class ResultadoAnalisis(Base):
     __tablename__ = "resultados_analisis"
 

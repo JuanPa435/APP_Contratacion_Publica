@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
 import ErrorAlert from '@/components/ErrorAlert'
+import ExportButtons from '@/components/ExportButtons'
 import api from '@/lib/api'
+import { exportAlertas } from '@/lib/export'
 import { FiAlertTriangle, FiAlertCircle, FiCheckCircle } from 'react-icons/fi'
 
 interface Alert {
@@ -86,20 +88,26 @@ export default function AlertasPage() {
           </div>
 
           {/* Filtros por nivel */}
-          <div className="flex gap-4 mb-6">
-            {(['todos', 'alta', 'media', 'baja'] as const).map((nivel) => (
-              <button
-                key={nivel}
-                onClick={() => setFilter(nivel)}
-                className={`px-4 py-2 rounded-lg font-medium transition capitalize ${
-                  filter === nivel
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:border-blue-300'
-                }`}
-              >
-                {nivel}
-              </button>
-            ))}
+          <div className="flex gap-4 mb-6 items-center justify-between">
+            <div className="flex gap-4">
+              {(['todos', 'alta', 'media', 'baja'] as const).map((nivel) => (
+                <button
+                  key={nivel}
+                  onClick={() => setFilter(nivel)}
+                  className={`px-4 py-2 rounded-lg font-medium transition capitalize ${
+                    filter === nivel
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 border border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  {nivel}
+                </button>
+              ))}
+            </div>
+            <ExportButtons
+              onExportExcel={exportAlertas}
+              showExcel={true}
+            />
           </div>
 
           {/* Alertas */}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from sklearn.ensemble import IsolationForest
@@ -51,6 +52,39 @@ def contract_to_features(contract: Contrato) -> list[float]:
         float(len(contract.descripcion or "")),
         float(len(contract.proveedor or "")),
     ]
+
+
+def _as_aware_datetime(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def filter_contracts_by_publication_window(
+    contracts: list[Contrato],
+    min_years_back: int = 1,
+    max_years_back: int = 2,
+) -> list[Contrato]:
+    if min_years_back < 0 or max_years_back < 0:
+        return contracts
+
+    newer_years = min(min_years_back, max_years_back)
+    older_years = max(min_years_back, max_years_back)
+
+    now = datetime.now(timezone.utc)
+    newer_limit = now - timedelta(days=365 * newer_years)
+    older_limit = now - timedelta(days=365 * older_years)
+
+    filtered: list[Contrato] = []
+    for contract in contracts:
+        publication_date = _as_aware_datetime(contract.fecha_publicacion)
+        if publication_date is None:
+            continue
+        if older_limit <= publication_date <= newer_limit:
+            filtered.append(contract)
+    return filtered
 
 
 def score_contracts(contracts: list[Contrato], contamination: float) -> list[AnalysisResult]:

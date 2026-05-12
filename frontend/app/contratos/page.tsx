@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
 import ErrorAlert from '@/components/ErrorAlert'
+import ExportButtons from '@/components/ExportButtons'
 import api from '@/lib/api'
+import { exportContratos } from '@/lib/export'
 import { FiSearch, FiFilter, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi'
 
 interface Contrato {
@@ -70,7 +72,7 @@ export default function ContratosPage() {
 
           {/* Filtros */}
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
               <div className="flex-1 relative">
                 <FiSearch className="absolute left-3 top-3 text-gray-400" />
                 <input
@@ -81,17 +83,23 @@ export default function ContratosPage() {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <button
-                onClick={() => setSoloAnomalos(!soloAnomalos)}
-                className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
-                  soloAnomalos
-                    ? 'bg-red-100 text-red-700 border-2 border-red-300'
-                    : 'bg-gray-100 text-gray-600 border-2 border-gray-300'
-                }`}
-              >
-                <FiFilter size={16} />
-                {soloAnomalos ? 'Solo Anomalías' : 'Mostrar Todos'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSoloAnomalos(!soloAnomalos)}
+                  className={`px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+                    soloAnomalos
+                      ? 'bg-red-100 text-red-700 border-2 border-red-300'
+                      : 'bg-gray-100 text-gray-600 border-2 border-gray-300'
+                  }`}
+                >
+                  <FiFilter size={16} />
+                  {soloAnomalos ? 'Solo Anomalías' : 'Mostrar Todos'}
+                </button>
+                <ExportButtons
+                  onExportExcel={() => exportContratos(soloAnomalos)}
+                  showExcel={true}
+                />
+              </div>
             </div>
           </div>
 

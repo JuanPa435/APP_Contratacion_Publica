@@ -5,6 +5,7 @@ from backend.database import get_db
 from backend.dependencies import get_current_user
 from backend.models import Alerta, Contrato, Usuario
 from backend.schemas import AlertRead, BulkContractImport, ContractBase, ContractRead
+from backend.services.analysis_service import filter_contracts_by_publication_window
 
 
 router = APIRouter()
@@ -88,11 +89,43 @@ def list_contracts(
     skip: int = 0,
     limit: int = Query(default=50, le=200),
     solo_anomalos: bool = False,
+    min_years_back: int = Query(default=1, ge=0, le=20),
+    max_years_back: int = Query(default=2, ge=0, le=20),
 ) -> list[Contrato]:
     query = db.query(Contrato)
     if solo_anomalos:
         query = query.filter(Contrato.es_anomalo.is_(True))
-    return query.order_by(Contrato.created_at.desc()).offset(skip).limit(limit).all()
+    contracts = query.order_by(Contrato.created_at.desc()).all()
+    contracts = filter_contracts_by_publication_window(
+        contracts,
+        min_years_back=min_years_back,
+        max_years_back=max_years_back,
+    )
+    return contracts[skip : skip + limit]
+
+
+@router.get("/alertas", response_model=list[AlertRead])
+def list_alerts(db: Session = Depends(get_db), _: Usuario = Depends(get_current_user)) -> list[Alerta]:
+    contracts = filter_contracts_by_publication_window(db.query(Contrato).all())
+    contract_ids = [contract.id for contract in contracts]
+    if not contract_ids:
+        return []
+    return (
+        db.query(Alerta)
+        .filter(Alerta.contrato_id.in_(contract_ids))
+        .order_by(Alerta.created_at.desc())
+        .all()
+    )
+
+
+@router.get("/resumen")
+def contracts_summary(db: Session = Depends(get_db), _: Usuario = Depends(get_current_user)) -> dict[str, int]:
+    contracts = filter_contracts_by_publication_window(db.query(Contrato).all())
+    total = len(contracts)
+    anomalos = sum(1 for contract in contracts if contract.es_anomalo)
+    contract_ids = [contract.id for contract in contracts]
+    alertas = db.query(Alerta).filter(Alerta.contrato_id.in_(contract_ids)).count() if contract_ids else 0
+    return {"total_contratos": total, "total_anomalos": anomalos, "alertas": alertas}
 
 
 @router.get("/{contract_id}", response_model=ContractRead)
@@ -105,16 +138,3 @@ def get_contract(
     if contract is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contrato no encontrado")
     return contract
-
-
-@router.get("/alertas", response_model=list[AlertRead])
-def list_alerts(db: Session = Depends(get_db), _: Usuario = Depends(get_current_user)) -> list[Alerta]:
-    return db.query(Alerta).order_by(Alerta.created_at.desc()).all()
-
-
-@router.get("/resumen")
-def contracts_summary(db: Session = Depends(get_db), _: Usuario = Depends(get_current_user)) -> dict[str, int]:
-    total = db.query(Contrato).count()
-    anomalos = db.query(Contrato).filter(Contrato.es_anomalo.is_(True)).count()
-    alertas = db.query(Alerta).count()
-    return {"total_contratos": total, "total_anomalos": anomalos, "alertas": alertas}

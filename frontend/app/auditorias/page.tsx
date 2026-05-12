@@ -5,7 +5,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
 import ErrorAlert from '@/components/ErrorAlert'
+import ExportButtons from '@/components/ExportButtons'
 import api from '@/lib/api'
+import { exportAuditorias } from '@/lib/export'
 import { FiPlus, FiFilter, FiCheckCircle, FiClock, FiAlertCircle, FiChevronDown, FiChevronUp, FiEdit2 } from 'react-icons/fi'
 
 interface Contrato {
@@ -201,13 +203,20 @@ export default function AuditoriasPage() {
               <h2 className="text-3xl font-bold text-gray-800">Auditorías</h2>
               <p className="text-gray-600 text-sm mt-1">Gestiona auditorías de contratos con anomalías</p>
             </div>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
-            >
-              <FiPlus size={20} />
-              Nueva Solicitud
-            </button>
+            <div className="flex gap-2">
+              <ExportButtons
+                onExportPdf={exportAuditorias}
+                showPdf={true}
+                showExcel={false}
+              />
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
+              >
+                <FiPlus size={20} />
+                Nueva Solicitud
+              </button>
+            </div>
           </div>
 
           {resumen && (
