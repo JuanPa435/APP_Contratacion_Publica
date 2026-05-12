@@ -20,49 +20,80 @@ interface AuthStore {
 }
 
 export const useAuth = create<AuthStore>((set) => ({
-  user: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null,
+  user: null,
   token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
   isLoading: false,
   error: null,
 
   login: async (email, password) => {
-    set({ isLoading: true, error: null })
     try {
-      const { data } = await api.post('/auth/login', { email, password })
-      localStorage.setItem('token', data.access_token)
-      set({ token: data.access_token })
-      await set({ isLoading: false })
-    } catch (error: any) {
-      set({ error: error.response?.data?.detail || 'Login fallido', isLoading: false })
-      throw error
+      set({ isLoading: true, error: null })
+      const response = await api.post('/auth/login', { email, password })
+      const token = response.data.access_token
+
+      localStorage.setItem('token', token)
+
+      // Obtener datos del usuario
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      const userResponse = await api.get('/auth/me')
+
+      set({
+        token,
+        user: userResponse.data,
+        isLoading: false
+      })
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.detail || 'Error en el login'
+      set({
+        error: errorMsg,
+        isLoading: false
+      })
+      throw err
     }
   },
 
   register: async (nombre, email, password, codigo_registro) => {
-    set({ isLoading: true, error: null })
     try {
-      const { data } = await api.post('/auth/register', { nombre, email, password, codigo_registro })
-      set({ user: data, isLoading: false })
-      localStorage.setItem('user', JSON.stringify(data))
-    } catch (error: any) {
-      set({ error: error.response?.data?.detail || 'Registro fallido', isLoading: false })
-      throw error
+      set({ isLoading: true, error: null })
+      await api.post('/auth/register', {
+        nombre,
+        email,
+        password,
+        codigo_registro
+      })
+      set({ isLoading: false })
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.detail || 'Error en el registro'
+      set({
+        error: errorMsg,
+        isLoading: false
+      })
+      throw err
     }
   },
 
   logout: () => {
     localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    delete api.defaults.headers.common['Authorization']
     set({ user: null, token: null })
   },
 
   getMe: async () => {
     try {
-      const { data } = await api.get('/auth/me')
-      set({ user: data })
-      localStorage.setItem('user', JSON.stringify(data))
-    } catch (error) {
-      set({ user: null, token: null })
+      const response = await api.get('/auth/me')
+      set({ user: response.data })
+    } catch (err) {
+      set({ user: null })
     }
   },
 }))
+
+// Restaurar token y usuario al cargar la app
+if (typeof window !== 'undefined') {
+  const token = localStorage.getItem('token')
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    useAuth.getState().getMe()
+  }
+}
+

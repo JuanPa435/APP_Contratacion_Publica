@@ -1,19 +1,19 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FiHome, FiFileText, FiBarChart2, FiSettings, FiAlertTriangle } from 'react-icons/fi'
-import { useAuth } from '@/lib/auth'
+import { FiHome, FiFileText, FiBarChart2, FiSettings, FiAlertTriangle, FiClipboard, FiDownload } from 'react-icons/fi'
 import clsx from 'clsx'
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { user } = useAuth()
 
   const menuItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: FiHome, show: true },
-    { href: '/contratos', label: 'Contratos', icon: FiFileText, show: true },
-    { href: '/alertas', label: 'Alertas', icon: FiAlertTriangle, show: true },
-    { href: '/analisis', label: 'Análisis', icon: FiBarChart2, show: true },
-    { href: '/admin', label: 'Administración', icon: FiSettings, show: user?.rol === 'admin' },
+    { href: '/dashboard', label: 'Dashboard', icon: FiHome },
+    { href: '/contratos', label: 'Contratos', icon: FiFileText },
+    { href: '/secop', label: 'SECOP', icon: FiDownload },
+    { href: '/alertas', label: 'Alertas', icon: FiAlertTriangle },
+    { href: '/analisis', label: 'Análisis', icon: FiBarChart2 },
+    { href: '/admin', label: 'Administración', icon: FiSettings },
+    { href: '/auditorias', label: 'Auditorías', icon: FiClipboard },
   ]
 
   return (
@@ -21,7 +21,7 @@ export default function Sidebar() {
       <nav className="px-4 space-y-2">
         {menuItems.map(
           (item) =>
-            item.show && (
+            (
               <Link
                 key={item.href}
                 href={item.href}

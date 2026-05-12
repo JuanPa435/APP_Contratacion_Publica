@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/lib/auth'
-import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
+import ErrorAlert from '@/components/ErrorAlert'
 import api from '@/lib/api'
 import { FiSearch, FiFilter, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi'
 
@@ -19,37 +18,30 @@ interface Contrato {
 }
 
 export default function ContratosPage() {
-  const router = useRouter()
-  const { token, user, getMe } = useAuth()
   const [contratos, setContratos] = useState<Contrato[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [soloAnomalos, setSoloAnomalos] = useState(false)
 
   useEffect(() => {
-    if (!token) {
-      router.push('/login')
-      return
-    }
-    getMe()
-  }, [token, router, getMe])
-
-  useEffect(() => {
     const fetchContratos = async () => {
       try {
+        setError(null)
         const { data } = await api.get('/contratos/', {
           params: { solo_anomalos: soloAnomalos },
         })
         setContratos(data)
-      } catch (error) {
-        console.error('Error fetching contratos:', error)
+      } catch (error: any) {
+        const errorMsg = error.response?.data?.detail || error.message || 'Error al cargar contratos'
+        setError(errorMsg)
       } finally {
         setLoading(false)
       }
     }
 
-    if (user) fetchContratos()
-  }, [user, soloAnomalos])
+    fetchContratos()
+  }, [soloAnomalos])
 
   const filtered = contratos.filter((c) =>
     search === ''
@@ -59,8 +51,6 @@ export default function ContratosPage() {
         c.entidad.toLowerCase().includes(search.toLowerCase())
   )
 
-  if (!token || !user) return null
-
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -68,6 +58,11 @@ export default function ContratosPage() {
         <Navbar />
 
         <main className="flex-1 p-8">
+          <ErrorAlert
+            error={error}
+            onDismiss={() => setError(null)}
+          />
+
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-800">Contratos</h2>
             <p className="text-gray-600 text-sm mt-1">Gestiona y monitorea contratos SECOP</p>
@@ -135,43 +130,44 @@ export default function ContratosPage() {
                     {filtered.map((contrato) => (
                       <tr
                         key={contrato.id}
-                        className="hover:bg-gray-50 transition cursor-pointer"
-                        onClick={() => router.push(`/contratos/${contrato.id}`)}
+                        className="hover:bg-gray-50 transition"
                       >
                         <td className="px-6 py-4 text-sm font-mono text-gray-600">
                           {contrato.codigo_proceso.substring(0, 20)}...
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-800 font-medium">
-                          {contrato.entidad.substring(0, 30)}
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {contrato.entidad.substring(0, 30)}...
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
+                        <td className="px-6 py-4 text-sm text-gray-700">
                           {contrato.titulo.substring(0, 40)}...
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-800">
-                          {contrato.valor ? `$${contrato.valor.toLocaleString()}` : '-'}
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {contrato.valor ? `$${(contrato.valor / 1000000).toFixed(1)}M` : 'N/A'}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-sm">
                           <span
-                            className={`text-sm font-semibold ${
-                              contrato.score_anomalia !== null && contrato.score_anomalia < -0.1
-                                ? 'text-red-600'
-                                : 'text-green-600'
+                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                              contrato.score_anomalia
+                                ? contrato.score_anomalia > 0.5
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-yellow-100 text-yellow-700'
+                                : 'bg-green-100 text-green-700'
                             }`}
                           >
-                            {contrato.score_anomalia ? contrato.score_anomalia.toFixed(3) : '-'}
+                            {contrato.score_anomalia
+                              ? (contrato.score_anomalia * 100).toFixed(0) + '%'
+                              : '0%'}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-sm">
                           {contrato.es_anomalo ? (
-                            <div className="flex items-center gap-2 text-red-600">
-                              <FiAlertTriangle size={16} />
-                              <span className="text-sm font-medium">Anomalía</span>
-                            </div>
+                            <span className="flex items-center gap-1 text-red-600 font-medium">
+                              <FiAlertTriangle size={16} /> Anómalo
+                            </span>
                           ) : (
-                            <div className="flex items-center gap-2 text-green-600">
-                              <FiCheckCircle size={16} />
-                              <span className="text-sm font-medium">Normal</span>
-                            </div>
+                            <span className="flex items-center gap-1 text-green-600 font-medium">
+                              <FiCheckCircle size={16} /> Normal
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -180,10 +176,6 @@ export default function ContratosPage() {
                 </table>
               </div>
             )}
-          </div>
-
-          <div className="mt-6 text-sm text-gray-500 text-center">
-            Mostrando {filtered.length} de {contratos.length} contratos
           </div>
         </main>
       </div>

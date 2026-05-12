@@ -1,8 +1,6 @@
 'use client'
 
 import { FormEvent, useEffect, useState } from 'react'
-import { useAuth } from '@/lib/auth'
-import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
 import api from '@/lib/api'
@@ -15,20 +13,10 @@ interface AnalysisResult {
 }
 
 export default function AnalisisPage() {
-  const router = useRouter()
-  const { token, user, getMe } = useAuth()
   const [contamination, setContamination] = useState(0.12)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    if (!token) {
-      router.push('/login')
-      return
-    }
-    getMe()
-  }, [token, router, getMe])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -46,7 +34,7 @@ export default function AnalisisPage() {
     }
   }
 
-  if (!token || !user) return null
+  // Auth deshabilitado temporalmente
 
   const anomalyPercentage = result
     ? ((result.total_anomalias / result.total_contratos) * 100).toFixed(1)

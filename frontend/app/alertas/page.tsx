@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/lib/auth'
-import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Sidebar from '@/components/Sidebar'
+import ErrorAlert from '@/components/ErrorAlert'
 import api from '@/lib/api'
 import { FiAlertTriangle, FiAlertCircle, FiCheckCircle } from 'react-icons/fi'
 
@@ -18,34 +17,27 @@ interface Alert {
 }
 
 export default function AlertasPage() {
-  const router = useRouter()
-  const { token, user, getMe } = useAuth()
   const [alertas, setAlertas] = useState<Alert[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<'todos' | 'alta' | 'media' | 'baja'>('todos')
-
-  useEffect(() => {
-    if (!token) {
-      router.push('/login')
-      return
-    }
-    getMe()
-  }, [token, router, getMe])
 
   useEffect(() => {
     const fetchAlertas = async () => {
       try {
+        setError(null)
         const { data } = await api.get('/contratos/alertas')
         setAlertas(data)
-      } catch (error) {
-        console.error('Error fetching alertas:', error)
+      } catch (error: any) {
+        const errorMsg = error.response?.data?.detail || error.message || 'Error al cargar alertas'
+        setError(errorMsg)
       } finally {
         setLoading(false)
       }
     }
 
-    if (user) fetchAlertas()
-  }, [user])
+    fetchAlertas()
+  }, [])
 
   const filtered = alertas.filter((a) => (filter === 'todos' ? true : a.nivel === filter))
 
@@ -75,7 +67,6 @@ export default function AlertasPage() {
     }
   }
 
-  if (!token || !user) return null
 
   return (
     <div className="flex min-h-screen">
@@ -84,6 +75,11 @@ export default function AlertasPage() {
         <Navbar />
 
         <main className="flex-1 p-8">
+          <ErrorAlert
+            error={error}
+            onDismiss={() => setError(null)}
+          />
+
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-800">Alertas</h2>
             <p className="text-gray-600 text-sm mt-1">Irregularidades detectadas en contratos</p>
